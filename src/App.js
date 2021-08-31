@@ -1,7 +1,5 @@
 // import logo from './logo.svg';
 import './App.css';
-import React from 'react';
-import ReactDOM from 'react-dom';
 
 function SyllabusForm(props) {
   return(
@@ -29,18 +27,6 @@ function SyllabusCard(props) {
   );
 }
 
-function Display(props) {
-  const syllabusItems= props.syllabusItems;
-  return(
-    syllabusItems.map((syllabusItem) => {
-    if(syllabusItem.editMode === "false") {
-      return <SyllabusCard syllabusData={syllabusItem}></SyllabusCard>
-
-    }
-    return <SyllabusForm syllabusData={syllabusItem}></SyllabusForm>
-  }));
-}
-
 function App() {
   const syllabusItems = [ 
     {
@@ -57,10 +43,13 @@ function App() {
     }
   ];
   return (
-    ReactDOM.render(
-      <Display syllabusItems={syllabusItems} />,
-      document.getElementById('root')
-    )
+    syllabusItems.map((syllabusItem) => {
+      if(syllabusItem.editMode === "false") {
+        return <SyllabusCard syllabusData={syllabusItem}></SyllabusCard>
+  
+      }
+      return <SyllabusForm syllabusData={syllabusItem}></SyllabusForm>
+    })
   );
 }
 
