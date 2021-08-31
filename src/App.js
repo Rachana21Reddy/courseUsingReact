@@ -33,18 +33,30 @@ function App() {
       syllabusTitle: "C",
       description: "Basics of C",
       objective: "Basics",
-      editMode: "false"
+      editMode: false
     },
     {
       syllabusTitle: "C",
       description: "DataTypes",
       objective: "DataTypes",
-      editMode: "true"
+      editMode: true
+    },
+    {
+      syllabusTitle: "C",
+      description: "Loops",
+      objective: "Loops",
+      editMode: true
+    },
+    {
+      syllabusTitle: "C",
+      description: "Functions",
+      objective: "Functions",
+      editMode: false
     }
   ];
   return (
     syllabusItems.map((syllabusItem) => {
-      if(syllabusItem.editMode === "false") {
+      if(syllabusItem.editMode === false) {
         return <SyllabusCard syllabusData={syllabusItem}></SyllabusCard>
   
       }
