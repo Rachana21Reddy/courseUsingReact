@@ -1,68 +1,77 @@
 // import logo from './logo.svg';
 import './App.css';
-
-function SyllabusForm(props) {
-  return(
-    <>
-    <lable>Syllabus Title</lable>
-    <input type="text" value={props.syllabusData.syllabusTitle}></input>
-    <br></br>
-    <lable>Description</lable>
-    <input type="text" value={props.syllabusData.description}></input>
-    <br></br>
-    <lable>Objective</lable>
-    <input type="text" value={props.syllabusData.objective}></input>
-    <br></br><br></br>
-    </>
-  );
-}
-
-function SyllabusCard(props) {
-  return (
-    <>
-      <p>{props.syllabusData.syllabusTitle}</p>
-      <p>{props.syllabusData.description}</p>
-      <p>{props.syllabusData.objective}</p>
-    </>
-  );
-}
+import React, { useState, useRef } from 'react';
 
 function App() {
-  const syllabusItems = [ 
-    {
-      syllabusTitle: "C",
-      description: "Basics of C",
-      objective: "Basics",
-      editMode: false
-    },
-    {
-      syllabusTitle: "C",
-      description: "DataTypes",
-      objective: "DataTypes",
-      editMode: true
-    },
-    {
-      syllabusTitle: "C",
-      description: "Loops",
-      objective: "Loops",
-      editMode: true
-    },
-    {
-      syllabusTitle: "C",
-      description: "Functions",
-      objective: "Functions",
-      editMode: false
-    }
-  ];
-  return (
-    syllabusItems.map((syllabusItem) => {
-      if(syllabusItem.editMode === false) {
-        return <SyllabusCard syllabusData={syllabusItem}></SyllabusCard>
-  
-      }
-      return <SyllabusForm syllabusData={syllabusItem}></SyllabusForm>
-    })
-  );
-}
+  const syllabusTitle = useRef(null);
+  const description = useRef(null);
+  const objective = useRef(null);
 
-export default App;
+  const [syllabusItems, setSyllabusItems] =  useState([]);
+  const syllabusItemsClone = [ ...syllabusItems];
+  const DisplayForm = () => {
+     syllabusItemsClone.push({
+        syllabusTitle: "",
+        description: "",
+        objective: "",
+        editMode: true
+      });
+      setSyllabusItems(syllabusItemsClone);
+  }
+
+  const SyllabusForm = (props) => {
+    return(
+      <>
+      <br></br>
+      <lable>Syllabus Title</lable>
+      <input type="text" defaultvalue={props.syllabusData.syllabusTitle} ref={syllabusTitle}></input>
+      <br></br>
+      <lable>Description</lable>
+      <input type="text" defaultvalue={props.syllabusData.description} ref={description}></input>
+      <br></br>
+      <lable>Objective</lable>
+      <input type="text" defaultvalue={props.syllabusData.objective} ref={objective}></input>
+      <br></br>
+      <button onClick={Save}>save</button>
+      <br></br>
+      </>
+    );
+  }
+  
+  const Save = () => {
+    syllabusItemsClone.pop();
+    syllabusItemsClone.push({
+      syllabusTitle: syllabusTitle.current.value,
+      description: description.current.value,
+      objective: objective.current.value,
+      editMode: false
+    });
+    console.log(syllabusItemsClone);
+    setSyllabusItems(syllabusItemsClone);
+  }
+  
+  const SyllabusCard = (props) => {
+    return (
+      <>
+        <br></br><strong>{props.number}</strong><br></br>
+        <lable>syllabusTitle:{props.syllabusData.syllabusTitle}</lable><br></br>
+        <lable>Description:{props.syllabusData.description}</lable><br></br>
+        <label>Objective:{props.syllabusData.objective}</label><br></br>
+        <button>Edit</button><br></br>
+      </>
+    );
+  }
+
+  return (
+    <div>
+      <button onClick={DisplayForm}>Add syllabus</button>
+      {syllabusItems.map((syllabusItem, index) => {
+        return((syllabusItem.editMode === false ? 
+        (<SyllabusCard key={`SyllabusCard.${index}`} syllabusData={syllabusItem} number={index+1}></SyllabusCard>)
+        :(<SyllabusForm syllabusData={syllabusItem}></SyllabusForm>)))}
+      )}
+    </div>
+    )
+  }
+  
+  export default App;
