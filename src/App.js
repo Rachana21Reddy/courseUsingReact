@@ -1,39 +1,39 @@
 // import logo from './logo.svg';
 import './App.css';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+// import Axios from 'axios';
 
 const SyllabusForm = props => {
   const [syllabusTitle, setTitle] = useState(props.syllabusData.syllabusTitle);
   const [description, setDescription] = useState(props.syllabusData.description);
-  const [objective, setObjective] = useState(props.syllabusData.objective);
+  const [objectives, setObjectives] = useState(props.syllabusData.objectives);
 
   const handleChange = event => {
     if(event.target.name === "syllabusTitle") setTitle(event.target.value);
     if(event.target.name === "description") setDescription(event.target.value);
-    if(event.target.name === "objective") setObjective(event.target.value);
+    if(event.target.name === "objectives") setObjectives(event.target.value);
   }
 
-  const Syllabus={
+  const syllabus={
     "syllabusTitle":syllabusTitle,
     "description":description,
-    "objective":objective
+    "objectives":objectives
   };
 
-  const handleSave = () => props.onSave(props.index,Syllabus);
-
+  const handleSave = () => props.onSave(props.index,syllabus);
   const handleCancel = () => props.onCancel(props.index);
 
   return(
     <div id="form">
     <br></br><strong>{props.index+1}</strong><br></br>
-    <label>Syllabus Title</label>
+    <label>syllabus Title</label>
     <input type="text" name="syllabusTitle" id="syllabusTitle" value={syllabusTitle} onChange={handleChange}></input>
     <br></br>
     <label>Description</label>
     <input type="text" name="description" id="description" value={description} onChange={handleChange}></input>
     <br></br>
-    <label>Objective</label>
-    <input type="text" name="objective" id="objective" value={objective} onChange={handleChange}></input>
+    <label>objectives</label>
+    <input type="text" name="objectives" id="objectives" value={objectives} onChange={handleChange}></input>
     <br></br>
     <button onClick={handleSave} id="save">save</button>
     <button onClick={handleCancel} id="cancel">cancel</button>
@@ -43,65 +43,91 @@ const SyllabusForm = props => {
 }
 
 const SyllabusCard = props => {
-  const editSyllabus = () => props.edit(props.index);
-  const deleteSyllabus = () => props.delete(props.index);
+  const editsyllabus = () => props.edit(props.index);
+  const deletesyllabus = () => props.delete(props.index);
   return (
     <div class="card">
       <br></br><label class="index">{props.index+1}</label><br></br>
       <label>syllabusTitle:{props.syllabusData.syllabusTitle}</label><br></br>
       <label>Description:{props.syllabusData.description}</label><br></br>
-      <label>Objective:{props.syllabusData.objective}</label><br></br>
-      <button onClick={editSyllabus} id="edit">Edit</button>
-      <button onClick={deleteSyllabus} id="delete">Delete</button><br></br>
+      <label>objectives:{props.syllabusData.objectives}</label><br></br>
+      <button onClick={editsyllabus} id="edit">Edit</button>
+      <button onClick={deletesyllabus} id="delete">Delete</button><br></br>
     </div>
   );
 }
 
-
 function App() {
- 
-  const [syllabusItems, setSyllabusItems] =  useState([]);
+  const [syllabusItems, setsyllabusItems] =  useState([]);
   const DisplayForm = () => {
     const syllabusItemsClone = [ ...syllabusItems];
     syllabusItemsClone.push({
       syllabusTitle: "",
       description: "",
-      objective: "",
+      objectives: "",
       editMode: true
     });
-    setSyllabusItems(syllabusItemsClone);
-  }
-  
-  const save = (index, Syllabus) => {
-    const syllabusItemsClone = [...syllabusItems];
-    console.log(Syllabus);
-    syllabusItemsClone[index] = Syllabus;
-    syllabusItemsClone[index].editMode = false;
-    console.log(syllabusItemsClone)
-    setSyllabusItems(syllabusItemsClone);
+    setsyllabusItems(syllabusItemsClone);
   }
 
+  useEffect(() => {
+    fetch("http://localhost:4000/api/syllabus", {
+      method: 'GET'
+    }).then(response => response.json())
+    .then((data)=> {
+      const syllabuses = data;
+      console.log(data);
+      syllabuses.forEach(syllabus => {
+        syllabus["editMode"] = false;
+        setsyllabusItems(syllabuses);
+        console.log(syllabuses);
+      }); 
+  })
+    .catch((error) => console.log(error))
+  }, [])
+  
+  const save = (index, syllabus) => {
+    const syllabusItemsClone = [...syllabusItems];
+    syllabusItemsClone[index] = syllabus;
+    syllabusItemsClone[index].editMode = false;
+    const fetchOptions = {
+      method: 'POST',
+      headers:{'Content-Type': 'application/json'},
+      body: JSON.stringify({syllabusTitle:syllabus.syllabusTitle, description:syllabus.description, objectives:syllabus.objectives})
+    }
+    fetch("http://localhost:4000/api/syllabus", fetchOptions)
+    .then((result)=> {if(result.status === 201) setsyllabusItems(syllabusItemsClone);})
+    .catch((error) => console.log(error))
+  }
+  
   const cancel = index => {
     const syllabusItemsClone = [...syllabusItems];
-    if(syllabusItemsClone[index].syllabusTitle === "" && syllabusItemsClone[index].description === "" && syllabusItemsClone[index].objective === "") {
+    if(syllabusItemsClone[index].syllabusTitle === "" && syllabusItemsClone[index].description === "" && syllabusItemsClone[index].objectives === "") {
       syllabusItemsClone.pop();
     }
     else {
       syllabusItemsClone[index].editMode = false;
     }
-    setSyllabusItems(syllabusItemsClone);
+    setsyllabusItems(syllabusItemsClone);
   }
 
   const handleEdit = index => {
     const syllabusItemsClone = [...syllabusItems];
     syllabusItemsClone[index].editMode = true;
-    setSyllabusItems(syllabusItemsClone);
+    setsyllabusItems(syllabusItemsClone);
   }
-
+  
   const handleDelete = index => {
     const syllabusItemsClone = [...syllabusItems];
-    syllabusItemsClone.splice(index,1);
-    setSyllabusItems(syllabusItemsClone);
+    const id=syllabusItemsClone[index].syllabusId;
+    const url = "http://localhost:4000/api/syllabus/"+id;
+    fetch(url,{ method:'DELETE' })
+    .then(result => {
+      if(result.status === 204) {
+        syllabusItemsClone.splice(index,1);
+        setsyllabusItems(syllabusItemsClone);
+      }
+    })
   }
   
   return (
